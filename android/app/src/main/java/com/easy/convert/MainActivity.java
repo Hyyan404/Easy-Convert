@@ -1,4 +1,4 @@
-package com.easyconvert.app;
+package com.easy.convert;
 
 import com.getcapacitor.BridgeActivity;
 

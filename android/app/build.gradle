@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.easyconvert.app"
+    namespace = "com.easy.convert"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.easyconvert.app"
+        applicationId "com.easy.convert"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

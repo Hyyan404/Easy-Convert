@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">التحويل الساهل</string>
-    <string name="title_activity_main">التحويل الساهل</string>
-    <string name="package_name">com.easyconvert.app</string>
-    <string name="custom_url_scheme">com.easyconvert.app</string>
+    <string name="app_name">easy-convert</string>
+    <string name="title_activity_main">easy-convert</string>
+    <string name="package_name">com.easy.convert</string>
+    <string name="custom_url_scheme">com.easy.convert</string>
 </resources>
