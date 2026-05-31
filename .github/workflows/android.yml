@@ -30,7 +30,7 @@ jobs:
         run: npx cap init easy-convert com.easy.convert --web-dir=build
 
       - name: Add Android platform
-        run: npx cap add android
+        run: npx cap sync android
 
       - name: Sync Capacitor
         run: npx cap sync android
