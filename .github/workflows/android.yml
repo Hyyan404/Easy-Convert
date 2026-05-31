@@ -9,18 +9,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
-      - run: npm install
-      - run: npm run build
+      - name: Install dependencies
+        run: npm install
 
-      - run: npm install @capacitor/android
-      - run: npx cap sync android
+      - name: Build React app
+        run: npm run build
+
+      - name: Install Capacitor
+        run: npm install @capacitor/android @capacitor/core @capacitor/cli
+
+      - name: Init Capacitor (if needed)
+        run: npx cap init easy-convert com.easy.convert --web-dir=build
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        run: npx cap sync android
 
       - name: Setup Java
         uses: actions/setup-java@v4
