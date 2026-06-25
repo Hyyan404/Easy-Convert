@@ -36,7 +36,7 @@ async function generateWithRetry(prompt, systemInstruction, userApiKey) {
 
 const t = {
   ar: {
-    appName: "التحويل الساهل", login: "تسجيل الدخول", signup: "إنشاء حساب", guest: "الدخول كضيف",
+    appName: "فلترك غير", login: "تسجيل الدخول", signup: "إنشاء حساب", guest: "الدخول كضيف",
     forgotPass: "نسيت كلمة المرور؟", email: "البريد الإلكتروني", password: "كلمة المرور", name: "الاسم الكامل",
     createPdf: "إنشاء PDF جديد", myDocs: "مستنداتي", templates: "القوالب", settings: "الإعدادات", about: "حول التطبيق",
     welcome: "مرحباً", write: "كتابة", config: "تنسيق الصفحة", export: "تصدير", save: "حفظ",
@@ -59,7 +59,7 @@ const t = {
     downloadPdf: "تحميل PDF", cancel: "إلغاء",
   },
   en: {
-    appName: "Easy Convert", login: "Login", signup: "Sign Up", guest: "Guest",
+    appName: "Filterak Ghair", login: "Login", signup: "Sign Up", guest: "Guest",
     forgotPass: "Forgot Password?", email: "Email", password: "Password", name: "Name",
     createPdf: "Create PDF", myDocs: "My Docs", templates: "Templates", settings: "Settings", about: "About",
     welcome: "Welcome", write: "Write", config: "Config", export: "Export", save: "Save",
@@ -94,7 +94,7 @@ const templatesContent = {
 
 export default function App() {
   const [lang, setLang] = useState(() => localStorage.getItem('app_lang') || 'ar');
-  const [theme, setTheme] = useState(() => localStorage.getItem('app_theme') || 'light');
+  const [theme, setTheme] = useState(() => localStorage.getItem('app_theme') || 'dark');
   const [user, setUser] = useState(() => { try { return JSON.parse(localStorage.getItem('app_user')); } catch { return null; } });
   const [view, setView] = useState(null);
   const [docs, setDocs] = useState(() => { try { return JSON.parse(localStorage.getItem('app_docs')) || []; } catch { return []; } });
@@ -104,16 +104,31 @@ export default function App() {
 
   useEffect(() => {
     const loadFirebase = async () => {
-      if (window.firebase) {
+      if (window.firebase && window.firebase.auth) {
+        if (!window.firebase.apps.length) {
+          window.firebase.initializeApp(firebaseConfig);
+        }
         setFirebaseReady(true);
         return;
       }
 
       const loadScript = (src) => {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
+          if (document.querySelector(`script[src="${src}"]`)) {
+            // Script already being loaded or exists
+            const existing = document.querySelector(`script[src="${src}"]`);
+            if (window.firebase && (src.includes('auth') ? window.firebase.auth : true)) {
+              resolve();
+            } else {
+              existing.addEventListener('load', resolve);
+              existing.addEventListener('error', reject);
+            }
+            return;
+          }
           const script = document.createElement('script');
           script.src = src;
           script.onload = resolve;
+          script.onerror = reject;
           document.body.appendChild(script);
         });
       };
@@ -122,8 +137,8 @@ export default function App() {
         await loadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js");
         await loadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js");
         
-        if (!firebase.apps.length) {
-          firebase.initializeApp(firebaseConfig);
+        if (window.firebase && !window.firebase.apps.length) {
+          window.firebase.initializeApp(firebaseConfig);
         }
         setFirebaseReady(true);
       } catch (error) {
@@ -200,18 +215,18 @@ export default function App() {
   const isDark = theme === 'dark';
   const isRtl = lang === 'ar';
   const tc = {
-    bg: isDark ? 'bg-gray-950' : 'bg-gray-50',
+    bg: isDark ? 'bg-[#0a0a0a]' : 'bg-gray-50',
     txt: isDark ? 'text-gray-100' : 'text-gray-900',
-    card: isDark ? 'bg-gray-900' : 'bg-white',
-    p: 'bg-[#0f2c59]',
-    a: 'bg-[#00b4d8]',
-    pt: 'text-[#0f2c59]',
-    at: 'text-[#00b4d8]'
+    card: isDark ? 'bg-[#171717]' : 'bg-white',
+    p: 'bg-[#8b5cf6]',
+    a: 'bg-[#7c3aed]',
+    pt: 'text-[#8b5cf6]',
+    at: 'text-[#7c3aed]'
   };
 
   if (!view && !firebaseReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f2c59] to-[#00b4d8]">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0a0a] via-[#171717] to-[#8b5cf6]">
         <Loader2 size={48} className="animate-spin text-white" />
       </div>
     );
@@ -219,7 +234,7 @@ export default function App() {
 
   if (!view) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f2c59] to-[#00b4d8]">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0a0a] via-[#171717] to-[#8b5cf6]">
         <Loader2 size={48} className="animate-spin text-white" />
       </div>
     );
@@ -306,10 +321,10 @@ function AuthScreen({ onLogin, txt, tc, isRtl }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-[#0f2c59] to-[#00b4d8]">
-      <div className={`${tc.card} p-8 rounded-3xl shadow-2xl w-full max-w-md`}>
+    <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-[#0a0a0a] via-[#171717] to-[#8b5cf6]">
+      <div className={`${tc.card} p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/5`}>
         <div className="flex justify-center mb-6">
-          <div className="bg-[#0f2c59] text-white p-4 rounded-full shadow-lg">
+          <div className="bg-gradient-to-tr from-[#8b5cf6] to-[#7c3aed] text-white p-4 rounded-full shadow-lg">
             <FileText size={48} />
           </div>
         </div>
@@ -350,7 +365,7 @@ function AuthScreen({ onLogin, txt, tc, isRtl }) {
               </div>
             )}
             <button type="submit" disabled={loading}
-              className="w-full bg-[#0f2c59] text-white py-3 rounded-xl font-bold text-lg shadow-md hover:opacity-90 transition disabled:opacity-60">
+              className="w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] text-white py-3 rounded-xl font-bold text-lg shadow-md hover:opacity-90 transition disabled:opacity-60">
               {loading ? <span className="flex items-center justify-center gap-2"><Loader2 size={20} className="animate-spin" /> جاري...</span>
                 : mode === 'login' ? txt.login : mode === 'signup' ? txt.signup : txt.sendResetLink}
             </button>
@@ -394,15 +409,15 @@ function Dashboard({ user, txt, nav, logout, tc }) {
         </button>
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <Card icon={<FilePlus size={32} />} title={txt.createPdf} color="bg-[#0f2c59]" textCol="text-white" onClick={() => nav('editor', null)} />
-        <Card icon={<Folder size={32} />} title={txt.myDocs} color="bg-[#00b4d8]" textCol="text-white" onClick={() => nav('library')} />
+        <Card icon={<FilePlus size={32} />} title={txt.createPdf} color="bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed]" textCol="text-white" onClick={() => nav('editor', null)} />
+        <Card icon={<Folder size={32} />} title={txt.myDocs} color="bg-gradient-to-br from-[#171717] to-[#0a0a0a]" textCol="text-white" onClick={() => nav('library')} />
         <Card icon={<LayoutTemplate size={32} />} title={txt.templates} color={tc.card} onClick={() => nav('templates')} />
         <Card icon={<SettingsIcon size={32} />} title={txt.settings} color={tc.card} onClick={() => nav('settings')} />
       </div>
       <div className="mt-8">
-        <div className={`${tc.card} p-6 rounded-3xl flex items-center justify-between cursor-pointer shadow-sm`} onClick={() => nav('about')}>
+        <div className={`${tc.card} p-6 rounded-3xl flex items-center justify-between cursor-pointer shadow-sm border border-white/5`} onClick={() => nav('about')}>
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-50 dark:bg-gray-800 rounded-xl text-[#0f2c59]"><Info size={24} /></div>
+            <div className="p-3 bg-purple-50 dark:bg-gray-800 rounded-xl text-[#8b5cf6]"><Info size={24} /></div>
             <span className="font-bold text-lg">{txt.about}</span>
           </div>
           <ChevronRight size={24} className="text-gray-400" />
@@ -743,7 +758,7 @@ Rules:
           <button 
             onClick={openFileNameModal}
             disabled={exporting}
-            className="px-3 md:px-4 py-2 rounded-xl bg-[#0f2c59] text-white font-bold text-sm flex items-center gap-2 hover:opacity-90 transition active:scale-95 disabled:opacity-60">
+            className="px-3 md:px-4 py-2 rounded-xl bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] text-white font-bold text-sm flex items-center gap-2 hover:opacity-90 transition active:scale-95 disabled:opacity-60">
             {exporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
             <span className="hidden md:inline">{exporting ? txt.exporting : txt.export}</span>
           </button>
@@ -903,10 +918,10 @@ Rules:
       {/* File Name Modal */}
       {showFileNameModal && (
         <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className={`${tc.card} w-full max-w-md rounded-3xl p-6 shadow-2xl`}>
+          <div className={`${tc.card} w-full max-w-md rounded-3xl p-6 shadow-2xl border border-white/5`}>
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-3">
-                <Download size={24} className="text-[#0f2c59]" />
+                <Download size={24} className="text-[#8b5cf6]" />
                 <h2 className="text-xl font-bold">{txt.downloadPdf}</h2>
               </div>
               <button onClick={() => setShowFileNameModal(false)} className="text-gray-400 hover:text-gray-600 transition">
@@ -939,7 +954,7 @@ Rules:
               </button>
               <button
                 onClick={handleFileNameSubmit}
-                className="flex-1 py-3 rounded-xl bg-[#0f2c59] text-white font-bold text-sm transition hover:opacity-90">
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] text-white font-bold text-sm transition hover:opacity-90">
                 {txt.download}
               </button>
             </div>
@@ -995,7 +1010,7 @@ function Library({ docs, setDocs, txt, nav, tc }) {
             {filtered.map(d => (
               <div key={d.id} className={`${tc.card} p-4 rounded-2xl shadow-sm flex items-center justify-between`}>
                 <div className="flex items-center gap-4 cursor-pointer flex-1" onClick={() => nav('editor', d)}>
-                  <div className="p-3 bg-blue-50 dark:bg-gray-800 rounded-xl text-[#0f2c59]"><FileText size={24} /></div>
+                  <div className="p-3 bg-purple-50 dark:bg-gray-800 rounded-xl text-[#8b5cf6]"><FileText size={24} /></div>
                   <div>
                     <h3 className="font-bold text-lg">{d.title}</h3>
                     <p className="text-xs text-gray-500">{new Date(d.date).toLocaleDateString()}</p>
@@ -1069,27 +1084,27 @@ function Settings({ txt, nav, lang, setLang, theme, setTheme, tc, apiKey, setApi
     <div className="min-h-screen flex flex-col">
       <TopBar title={txt.settings} nav={nav} tc={tc} />
       <div className="p-6 space-y-6">
-        <div className={`${tc.card} rounded-3xl p-6 shadow-sm space-y-6`}>
+        <div className={`${tc.card} rounded-3xl p-6 shadow-sm space-y-6 border border-white/5`}>
           <div className="flex justify-between items-center">
             <span className="font-bold">{txt.language}</span>
             <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
-              <button onClick={() => setLang('ar')} className={`px-4 py-2 rounded-lg text-sm font-bold transition ${lang === 'ar' ? 'bg-white shadow text-[#0f2c59]' : 'text-gray-500'}`}>عربي</button>
-              <button onClick={() => setLang('en')} className={`px-4 py-2 rounded-lg text-sm font-bold transition ${lang === 'en' ? 'bg-white shadow text-[#0f2c59]' : 'text-gray-500'}`}>English</button>
+              <button onClick={() => setLang('ar')} className={`px-4 py-2 rounded-lg text-sm font-bold transition ${lang === 'ar' ? 'bg-white shadow text-[#8b5cf6]' : 'text-gray-500'}`}>عربي</button>
+              <button onClick={() => setLang('en')} className={`px-4 py-2 rounded-lg text-sm font-bold transition ${lang === 'en' ? 'bg-white shadow text-[#8b5cf6]' : 'text-gray-500'}`}>English</button>
             </div>
           </div>
           <div className="w-full h-px bg-gray-100 dark:bg-gray-800" />
           <div className="flex justify-between items-center">
             <span className="font-bold">{theme === 'dark' ? txt.dark : txt.light}</span>
             <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
-              <button onClick={() => setTheme('light')} className={`px-4 py-2 rounded-lg text-sm font-bold transition ${theme === 'light' ? 'bg-white shadow text-[#0f2c59]' : 'text-gray-500'}`}>{txt.light}</button>
-              <button onClick={() => setTheme('dark')} className={`px-4 py-2 rounded-lg text-sm font-bold transition ${theme === 'dark' ? 'bg-white shadow text-[#0f2c59]' : 'text-gray-500'}`}>{txt.dark}</button>
+              <button onClick={() => setTheme('light')} className={`px-4 py-2 rounded-lg text-sm font-bold transition ${theme === 'light' ? 'bg-white shadow text-[#8b5cf6]' : 'text-gray-500'}`}>{txt.light}</button>
+              <button onClick={() => setTheme('dark')} className={`px-4 py-2 rounded-lg text-sm font-bold transition ${theme === 'dark' ? 'bg-white shadow text-[#8b5cf6]' : 'text-gray-500'}`}>{txt.dark}</button>
             </div>
           </div>
         </div>
 
-        <div className={`${tc.card} rounded-3xl p-6 shadow-sm space-y-4`}>
+        <div className={`${tc.card} rounded-3xl p-6 shadow-sm space-y-4 border border-white/5`}>
           <div className="flex items-center gap-2">
-            <Key size={20} className="text-[#00b4d8]" />
+            <Key size={20} className="text-[#8b5cf6]" />
             <h3 className="font-bold text-lg">{txt.apiKey}</h3>
           </div>
           <p className="text-sm text-gray-500">{txt.apiKeyDesc}</p>
@@ -1123,14 +1138,14 @@ function About({ txt, nav, tc }) {
     <div className="min-h-screen flex flex-col">
       <TopBar title={txt.about} nav={nav} tc={tc} />
       <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-32 h-32 bg-[#0f2c59] rounded-full flex items-center justify-center text-white shadow-2xl mb-8">
+        <div className="w-32 h-32 bg-gradient-to-tr from-[#8b5cf6] to-[#7c3aed] rounded-full flex items-center justify-center text-white shadow-2xl mb-8">
           <FileText size={64} />
         </div>
         <h1 className="text-3xl font-bold mb-2">{txt.appName}</h1>
         <p className="text-gray-500 mb-8 max-w-sm">{txt.aboutDesc}</p>
-        <div className={`${tc.card} px-6 py-4 rounded-2xl shadow-sm`}>
-          <p className="font-bold text-[#00b4d8]">{txt.developer}</p>
-          <p className="text-sm text-gray-400 mt-1">Version 4.0</p>
+        <div className={`${tc.card} px-6 py-4 rounded-2xl shadow-sm border border-white/5`}>
+          <p className="font-bold text-[#8b5cf6]">{txt.developer}</p>
+          <p className="text-sm text-gray-400 mt-1">Version 5.0 (Filterak Ghair)</p>
         </div>
       </div>
     </div>
